@@ -749,4 +749,72 @@
 
         function previewMissing() {
             if (botState.missingPixels === 0) {
-                logActivity('No template scanned yet. Please sc
+                logActivity('No template scanned yet. Please scan first.', 'warning');
+                return;
+            }
+            logActivity(`Highlighting ${botState.missingPixels} missing pixels on canvas`, 'info');
+        }
+
+        // Painting control functions
+        async function startPainting() {
+            if (botState.missingPixels === 0) {
+                logActivity('No template scanned. Please scan template first.', 'error');
+                return;
+            }
+            
+            botState.isPainting = true;
+            botState.startTime = new Date();
+            updateStatus('painting', '🎨 PAINTING');
+            
+            // Update button states
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('pause-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = false;
+            
+            logActivity('Started auto painting process', 'success');
+            
+            // Start painting simulation
+            paintingLoop();
+        }
+
+        function pausePainting() {
+            if (!botState.isPainting || botState.isPaused) return;
+            
+            botState.isPaused = true;
+            updateStatus('paused', '⏸️ PAUSED');
+            
+            document.getElementById('pause-btn').disabled = true;
+            document.getElementById('resume-btn').disabled = false;
+            
+            logActivity('Painting paused', 'warning');
+        }
+
+        function resumePainting() {
+            if (!botState.isPainting || !botState.isPaused) return;
+            
+            botState.isPaused = false;
+            updateStatus('painting', '🎨 PAINTING');
+            
+            document.getElementById('pause-btn').disabled = false;
+            document.getElementById('resume-btn').disabled = true;
+            
+            logActivity('Painting resumed', 'info');
+        }
+
+        function stopPainting() {
+            botState.isPainting = false;
+            botState.isPaused = false;
+            updateStatus('idle', '🟢 IDLE');
+            
+            // Reset button states
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('pause-btn').disabled = true;
+            document.getElementById('resume-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = true;
+            
+            logActivity('Painting stopped', 'warning');
+        }
+
+        // Painting simulation loop
+        async function paintingLoop() {
+            while
